@@ -42,6 +42,7 @@ def init_seed(seed):
 
 def main():
     args = get_args()
+    os.environ['LOCAL_RANK'] = '0'
     args.local_rank = int(os.environ["LOCAL_RANK"])
     if args.local_rank == 0 or args.local_rank is None:
         print("Command line arguments: ", args)
