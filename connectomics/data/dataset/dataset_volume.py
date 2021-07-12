@@ -76,7 +76,6 @@ class VolumeDataset(torch.utils.data.Dataset):
             assert (sample_volume_size[0] == 1) * (sample_label_size[0] == 1)
 
         # data format
-        print(volume)
         self.volume = volume
         self.label = label
         self.augmentor = augmentor
@@ -238,7 +237,6 @@ class VolumeDataset(torch.utils.data.Dataset):
         of foreground pixels or valid ratio.
         """
         while True:
-            print(vol_size)
             sample = self._random_sampling(vol_size)
             pos, out_volume, out_label, out_valid = sample
             if self.augmentor is not None:

@@ -82,6 +82,8 @@ def main():
 
     # Start training or inference:
     if cfg.DATASET.DO_CHUNK_TITLE == 0:
+        print(cfg.INFERENCE.DO_SINGLY)
+        print(args.inference)
         test_func = trainer.test_singly if cfg.INFERENCE.DO_SINGLY else trainer.test
         test_func() if args.inference else trainer.train()
     else:
