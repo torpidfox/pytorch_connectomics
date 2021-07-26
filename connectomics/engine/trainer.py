@@ -237,8 +237,8 @@ class Trainer(object):
                     st = (np.array(st) *
                           np.array([1]+output_scale)).astype(int).tolist()
                     out_block = output[idx]
-                    plt.imshow(output[idx][0])
-                    plt.show()
+                    plt.imsave(f'output_{idx}.png', output[idx][0])
+                    
                     if result[st[0]].ndim - out_block.ndim == 1:  # 2d model
                         out_block = out_block[:, np.newaxis, :]
 
