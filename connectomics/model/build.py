@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import functools
 
 from .arch import UNet3D, UNet2D, FPN3D, DeepLabV3, UNetPlus3D, UNetGenerator
 from .backbone import RepVGG3D
@@ -51,6 +52,8 @@ def build_model(cfg, device, rank=None):
         kwargs['input_nc'] = cfg.MODEL.IN_PLANES
         kwargs['output_nc'] = cfg.MODEL.OUT_PLANES
         kwargs['num_downs'] = 8
+        kwargs['ngf'] = 64
+        kwargs['norm_layer'] = functools.partial(nn.InstanceNorm2d, affine=False, track_running_stats=False)
 
     model = MODEL_MAP[cfg.MODEL.ARCHITECTURE](**kwargs)
     print('model: ', model.__class__.__name__)
