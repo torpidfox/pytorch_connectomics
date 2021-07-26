@@ -7,6 +7,7 @@ import time
 import math
 import GPUtil
 import numpy as np
+import matplotlib.pyplot as plt
 from yacs.config import CfgNode
 
 import torch
@@ -236,6 +237,8 @@ class Trainer(object):
                     st = (np.array(st) *
                           np.array([1]+output_scale)).astype(int).tolist()
                     out_block = output[idx]
+                    plt.imshow(output[idx])
+                    plt.show()
                     if result[st[0]].ndim - out_block.ndim == 1:  # 2d model
                         out_block = out_block[:, np.newaxis, :]
 
@@ -357,8 +360,6 @@ class Trainer(object):
             pretrained_dict = update_state_dict(
                 self.cfg, pretrained_dict, mode=self.mode)
             model_dict = self.model.module.state_dict()  # nn.DataParallel
-            print(pretrained_dict.keys())
-            print(model_dict.keys())
 
             # show model keys that do not match pretrained_dict
             if not model_dict.keys() == pretrained_dict.keys():
@@ -372,7 +373,6 @@ class Trainer(object):
             pretrained_dict = {k: v for k,
                                v in pretrained_dict.items() if k in model_dict}
             
-            print(pretrained_dict)
             # 2. overwrite entries in the existing state dict (if size match)
             for param_tensor in pretrained_dict:
                 if model_dict[param_tensor].size() == pretrained_dict[param_tensor].size():
