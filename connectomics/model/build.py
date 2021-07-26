@@ -47,8 +47,9 @@ def build_model(cfg, device, rank=None):
         
     if model_arch == 'unet_cyclegan':
         print('for cyclegan unet additional kwargs parameters are ignored')
-        
-        kwargs = {}
+        kwargs['input_nc'] = cfg.MODEL.IN_PLANES
+        kwargs['output_nc'] = cfg.MODEL.OUT_PLANES
+        kwargs['num_downs'] = 8
 
     model = MODEL_MAP[cfg.MODEL.ARCHITECTURE](**kwargs)
     print('model: ', model.__class__.__name__)
