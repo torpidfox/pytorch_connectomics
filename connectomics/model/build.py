@@ -2,10 +2,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .arch import UNet3D, UNet2D, FPN3D, DeepLabV3, UNetPlus3D
+from .arch import UNet3D, UNet2D, FPN3D, DeepLabV3, UNetPlus3D, UNetGenerator
 from .backbone import RepVGG3D
 
 MODEL_MAP = {
+    'unet_cyclegan': UNetGenerator,
     'unet_3d': UNet3D,
     'unet_2d': UNet2D,
     'fpn_3d': FPN3D,
@@ -43,6 +44,11 @@ def build_model(cfg, device, rank=None):
         kwargs['name'] = model_arch
         kwargs['backbone_type'] = cfg.MODEL.BACKBONE
         kwargs['aux_out'] = cfg.MODEL.AUX_OUT
+        
+    if model_arch == 'unet_cyclegan':
+        print('for cyclegan unet additional kwargs parameters are ignored')
+        
+        kwargs = {}
 
     model = MODEL_MAP[cfg.MODEL.ARCHITECTURE](**kwargs)
     print('model: ', model.__class__.__name__)
