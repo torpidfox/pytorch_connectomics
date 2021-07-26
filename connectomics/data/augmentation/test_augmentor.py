@@ -5,7 +5,6 @@ from collections import OrderedDict
 import numpy as np
 import itertools
 import torch
-import matplotlib.pyplot as plt
 from skimage.transform import resize
 from connectomics.model.utils import SplitActivation
 
