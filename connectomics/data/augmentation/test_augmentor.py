@@ -5,6 +5,7 @@ from collections import OrderedDict
 import numpy as np
 import itertools
 import torch
+import matplotlib.pyplot as plt
 from skimage.transform import resize
 from connectomics.model.utils import SplitActivation
 
@@ -162,6 +163,8 @@ class TestAugmentor(object):
                     _forward(model, volume)).detach().cpu()
             else:
                 vout = _forward(model, volume).detach().cpu()
+                
+            plt.imsave('output.png', vout[0])
 
             if transpose:  # swap x-/y-axis
                 vout = torch.transpose(vout, 2, 3)
