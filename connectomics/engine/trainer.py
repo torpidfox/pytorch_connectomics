@@ -357,6 +357,7 @@ class Trainer(object):
             pretrained_dict = update_state_dict(
                 self.cfg, pretrained_dict, mode=self.mode)
             model_dict = self.model.module.state_dict()  # nn.DataParallel
+            print(pretrained_dict.keys())
 
             # show model keys that do not match pretrained_dict
             if not model_dict.keys() == pretrained_dict.keys():
