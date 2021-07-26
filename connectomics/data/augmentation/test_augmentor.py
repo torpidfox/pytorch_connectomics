@@ -164,7 +164,8 @@ class TestAugmentor(object):
             else:
                 vout = _forward(model, volume).detach().cpu()
                 
-            plt.imsave('output.png', vout[0])
+            print(vout.shape)
+            plt.imsave('output.png', vout[0][0])
 
             if transpose:  # swap x-/y-axis
                 vout = torch.transpose(vout, 2, 3)
