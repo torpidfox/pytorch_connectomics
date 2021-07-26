@@ -358,6 +358,7 @@ class Trainer(object):
                 self.cfg, pretrained_dict, mode=self.mode)
             model_dict = self.model.module.state_dict()  # nn.DataParallel
             print(pretrained_dict.keys())
+            print(model_dict.keys())
 
             # show model keys that do not match pretrained_dict
             if not model_dict.keys() == pretrained_dict.keys():
@@ -370,6 +371,8 @@ class Trainer(object):
             # 1. filter out unnecessary keys by name
             pretrained_dict = {k: v for k,
                                v in pretrained_dict.items() if k in model_dict}
+            
+            print(pretrained_dict)
             # 2. overwrite entries in the existing state dict (if size match)
             for param_tensor in pretrained_dict:
                 if model_dict[param_tensor].size() == pretrained_dict[param_tensor].size():
