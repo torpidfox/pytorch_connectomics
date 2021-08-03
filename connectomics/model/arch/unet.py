@@ -221,9 +221,9 @@ class UNet2D(nn.Module):
                  out_channel: int = 3,
                  filters: List[int] = [32, 64, 128, 256, 512],
                  pad_mode: str = 'replicate',
-                 act_mode: str = 'elu',
+                 act_mode: str = 'relu',
                  norm_mode: str = 'bn',
-                 init_mode: str = 'orthogonal',
+                 init_mode: str = 'kaiming',
                  pooling: bool = False,
                  **kwargs):
         super().__init__()
