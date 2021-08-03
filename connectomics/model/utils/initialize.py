@@ -25,7 +25,7 @@ def xavier_init(model):
 def kaiming_init(model):
     # he initialization
     for m in model.modules():
-        if isinstance(m, (nn.Conv2d, nn.Conv3d, nn.Linear)):
+        if isinstance(m, (nn.Conv2d, nn.Conv3d, nn.Linear, nn.ConvTranspose2d)):
             nn.init.kaiming_normal_(m.weight, mode='fan_in')
 
 def selu_init(model):
