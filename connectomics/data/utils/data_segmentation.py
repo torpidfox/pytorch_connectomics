@@ -122,6 +122,7 @@ def seg_to_small_seg(seg, thres=25, rr=2):
 def seg_to_instance_bd(seg: np.ndarray,
                        tsz_h: int = 1,
                        do_bg: bool = True,
+                       invert: bool = False,
                        do_convolve: bool = True) -> np.ndarray:
     """Generate instance contour map from segmentation masks.
 
@@ -171,6 +172,10 @@ def seg_to_instance_bd(seg: np.ndarray,
             patch[patch == 0] = mm+1
             p1 = patch.min(axis=1)
             bd[z] = ((p0 != 0)*(p1 != 0)*(p0 != p1)).reshape(sz[1:])
+            
+    if invert:
+        return 1 - bd
+    
     return bd
 
 
@@ -286,12 +291,12 @@ def seg_to_targets(label_orig: np.ndarray,
             out[tid] = (seg_to_small_seg(label, size_thres, zratio) > 0)[
                 None, :].astype(np.float32)
         elif topt[0] == '4':  # instance boundary mask
-            _, bd_sz, do_bg = [int(x) for x in topt.split('-')]
+            _, bd_sz, do_bg, invert = [int(x) for x in topt.split('-')]
             if label.ndim == 2:
                 out[tid] = seg_to_instance_bd(
-                    label[None, :], bd_sz, do_bg).astype(np.float32)
+                    label[None, :], bd_sz, do_bg, invert).astype(np.float32)
             else:
-                out[tid] = seg_to_instance_bd(label, bd_sz, do_bg)[
+                out[tid] = seg_to_instance_bd(label, bd_sz, do_bg, invert)[
                     None, :].astype(np.float32)
         elif topt[0] == '5':  # distance transform (instance)
             if len(topt) == 1:
