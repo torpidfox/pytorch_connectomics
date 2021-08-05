@@ -181,7 +181,7 @@ def get_dataset(cfg,
     elif mode == 'val':
         sample_volume_size = cfg.MODEL.INPUT_SIZE
         sample_label_size = sample_volume_size
-        sample_stride = [x//2 for x in sample_volume_size]
+        sample_stride = [max(1, x//2) for x in sample_volume_size]
         topt, wopt = cfg.MODEL.TARGET_OPT, cfg.MODEL.WEIGHT_OPT
         iter_num = -1
 
