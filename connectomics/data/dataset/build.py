@@ -232,7 +232,7 @@ def get_dataset(cfg,
         volume, label, valid_mask = _get_input(
             cfg, mode, rank, dir_name_init, img_name_init)
         dataset = VolumeDataset(volume=volume, label=label, valid_mask=valid_mask,
-                                iter_num=iter_num, **shared_kwargs)
+                                iter_num=iter_num,  **shared_kwargs)
 
     return dataset
 

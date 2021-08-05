@@ -72,8 +72,8 @@ class VolumeDataset(torch.utils.data.Dataset):
         assert mode in ['train', 'val', 'test']
         self.mode = mode
         self.do_2d = do_2d
-        if self.do_2d:
-            assert (sample_volume_size[0] == 1) * (sample_label_size[0] == 1)
+        # if self.do_2d and not self.binary_2classes:
+        #     assert (sample_volume_size[0] == 1) * (sample_label_size[0] == 1)
 
         # data format
         self.volume = volume
@@ -316,7 +316,7 @@ class VolumeDataset(torch.utils.data.Dataset):
     #######################################################
     # Utils
     #######################################################
-    def _assert_valid_shape(self):
+    def _asssert_valid_shape(self):
         assert all(
             [(self.sample_volume_size <= x).all()
              for x in self.volume_size]

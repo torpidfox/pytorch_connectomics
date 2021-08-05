@@ -178,6 +178,20 @@ def seg_to_instance_bd(seg: np.ndarray,
     
     return bd
 
+def boundaries_to_2ch(bd):
+    channel1 = np.zeros(bd.shape)
+    channel2 = np.zeros(bd.shape)
+    
+    channel1[bd == 0] = 1
+    channel2[bd == 1] = 1
+    
+    channels_together = np.vstack((channel1, channel2))
+    
+    print(channels_together.shape)
+    
+    return channels_together
+    
+
 
 def markInvalid(seg, iter_num=2, do_2d=True):
     # find invalid
@@ -291,13 +305,18 @@ def seg_to_targets(label_orig: np.ndarray,
             out[tid] = (seg_to_small_seg(label, size_thres, zratio) > 0)[
                 None, :].astype(np.float32)
         elif topt[0] == '4':  # instance boundary mask
-            _, bd_sz, do_bg, invert = [int(x) for x in topt.split('-')]
+            _, bd_sz, do_bg, classes2 = [int(x) for x in topt.split('-')]
+
             if label.ndim == 2:
-                out[tid] = seg_to_instance_bd(
-                    label[None, :], bd_sz, do_bg, invert).astype(np.float32)
+                out[tid] = boundaries_to_2ch(
+                    seg_to_instance_bd(label[None, :], bd_sz, do_bg).astype(np.float32)
+                )
+                
             else:
-                out[tid] = seg_to_instance_bd(label, bd_sz, do_bg, invert)[
-                    None, :].astype(np.float32)
+                out[tid] = boundaries_to_2ch(
+                    seg_to_instance_bd(label, bd_sz, do_bg)[None, :].astype(np.float32)
+                )
+                
         elif topt[0] == '5':  # distance transform (instance)
             if len(topt) == 1:
                 topt = topt + '-2d'

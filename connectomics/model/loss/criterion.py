@@ -34,6 +34,7 @@ class Criterion(object):
         'DiceLoss': DiceLoss,
         'WeightedCE': WeightedCE,
         'WeightedBCEWithLogitsLoss': WeightedBCEWithLogitsLoss,
+        'CrossEntropyLoss': torch.nn.CrossEntropyLoss
     }
 
     regu_dict = {
