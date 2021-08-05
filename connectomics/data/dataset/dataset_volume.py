@@ -316,7 +316,7 @@ class VolumeDataset(torch.utils.data.Dataset):
     #######################################################
     # Utils
     #######################################################
-    def _asssert_valid_shape(self):
+    def _assert_valid_shape(self):
         assert all(
             [(self.sample_volume_size <= x).all()
              for x in self.volume_size]
