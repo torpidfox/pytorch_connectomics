@@ -311,7 +311,7 @@ def seg_to_targets(label_orig: np.ndarray,
                 out[tid] = seg_to_instance_bd(label[None, :], bd_sz, do_bg).astype(np.float32)
                 
             else:
-                seg_to_instance_bd(label, bd_sz, do_bg)[None, :].astype(np.float32)
+                out[tid] = seg_to_instance_bd(label, bd_sz, do_bg)[None, :].astype(np.float32)
                 
         elif topt[0] == '5':  # distance transform (instance)
             if len(topt) == 1:

@@ -33,8 +33,7 @@ class Criterion(object):
         'WeightedBCE': WeightedBCE,
         'DiceLoss': DiceLoss,
         'WeightedCE': WeightedCE,
-        'WeightedBCEWithLogitsLoss': WeightedBCEWithLogitsLoss,
-        'CrossEntropyLoss': torch.nn.CrossEntropyLoss
+        'WeightedBCEWithLogitsLoss': WeightedBCEWithLogitsLoss
     }
 
     regu_dict = {
@@ -96,6 +95,7 @@ class Criterion(object):
         return out
 
     def get_one_loss(self, lopt, params):
+        print(lopt)
         assert lopt in self.loss_dict
         if params is None:
             return self.loss_dict[lopt]()
