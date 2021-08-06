@@ -53,10 +53,13 @@ class Criterion(object):
                  regu_opt: Optional[List[str]] = None,
                  regu_target: Optional[List[List[int]]] = None,
                  regu_weight: Optional[List[float]] = None,
-                 do_2d: bool = False):
+                 do_2d: bool = False,
+                 split_output: bool = True):
 
         self.device = device
         self.target_opt = target_opt
+        self.split_output = split_output
+
         self.splitter = SplitActivation(
             target_opt, split_only=True, do_2d=do_2d)
 
@@ -124,7 +127,8 @@ class Criterion(object):
                  losses_vis: dict = {},  # visualizing individual losses
                  ) -> Tuple[Tensor, dict]:
         # split the prediction for each target
-        x = self.splitter(pred)
+        
+        x = self.splitter(pred) if self.split_output else pred
 
         loss = 0.0
         for i in range(self.num_target):
@@ -204,4 +208,4 @@ class Criterion(object):
 
         return cls(device, cfg.MODEL.TARGET_OPT, cfg.MODEL.LOSS_OPTION, cfg.MODEL.OUTPUT_ACT,
                    cfg.MODEL.LOSS_WEIGHT, loss_kwargs, cfg.MODEL.REGU_OPT, cfg.MODEL.REGU_TARGET,
-                   cfg.MODEL.REGU_WEIGHT, do_2d=cfg.DATASET.DO_2D)
+                   cfg.MODEL.REGU_WEIGHT, do_2d=cfg.DATASET.DO_2D, split_output=cfg.MODEL.LOSS_SPLIT_OUTPUT)

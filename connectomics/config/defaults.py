@@ -46,6 +46,7 @@ _C.MODEL.OUTPUT_ACT = [['none']]
 
 # Weight for each loss function
 _C.MODEL.LOSS_WEIGHT = [[1.0]]
+_C.MODEL.LOSS_SPLIT_OUTPUT = False
 _C.MODEL.LOSS_KWARGS_KEY = None
 _C.MODEL.LOSS_KWARGS_VAL = None
 
