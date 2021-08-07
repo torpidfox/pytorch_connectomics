@@ -206,4 +206,4 @@ class Criterion(object):
 
         return cls(device, cfg.MODEL.TARGET_OPT, cfg.MODEL.LOSS_OPTION, cfg.MODEL.OUTPUT_ACT,
                    cfg.MODEL.LOSS_WEIGHT, loss_kwargs, cfg.MODEL.REGU_OPT, cfg.MODEL.REGU_TARGET,
-                   cfg.MODEL.REGU_WEIGHT, do_2d=cfg.DATASET.DO_2D, split_output=cfg.MODEL.LOSS_SPLIT_OUTPUT)
+                   cfg.MODEL.REGU_WEIGHT, do_2d=cfg.DATASET.DO_2D)
