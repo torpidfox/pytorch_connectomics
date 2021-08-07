@@ -53,12 +53,10 @@ class Criterion(object):
                  regu_opt: Optional[List[str]] = None,
                  regu_target: Optional[List[List[int]]] = None,
                  regu_weight: Optional[List[float]] = None,
-                 do_2d: bool = False,
-                 split_output: bool = True):
+                 do_2d: bool = False):
 
         self.device = device
         self.target_opt = target_opt
-        self.split_output = split_output
 
         self.splitter = SplitActivation(
             target_opt, split_only=True, do_2d=do_2d)
@@ -128,7 +126,7 @@ class Criterion(object):
                  ) -> Tuple[Tensor, dict]:
         # split the prediction for each target
         
-        x = self.splitter(pred) if self.split_output else pred
+        x = self.splitter(pred)
 
         loss = 0.0
         for i in range(self.num_target):

@@ -326,7 +326,10 @@ def seg_to_targets(label_orig: np.ndarray,
             distance = edt_semantic(label.copy(), mode, float(a), float(b))
             out[tid] = distance[np.newaxis, :].astype(np.float32)
         elif topt[0] == '9':  # generic semantic segmentation
-            out[tid] = label.astype(np.int64)
+            if label.ndim == 2:
+                out[tid] = seg_to_instance_bd(label[None, :], 1, 1).astype(np.int64)
+            else:
+                out[tid] = seg_to_instance_bd(label, 1, 1)[None, :].astype(np.int64)
         else:
             raise NameError("Target option %s is not valid!" % topt[0])
 
