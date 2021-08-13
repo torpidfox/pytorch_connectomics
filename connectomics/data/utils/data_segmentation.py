@@ -305,14 +305,19 @@ def seg_to_targets(label_orig: np.ndarray,
             out[tid] = (seg_to_small_seg(label, size_thres, zratio) > 0)[
                 None, :].astype(np.float32)
         elif topt[0] == '4':  # instance boundary mask
-            _, bd_sz, do_bg, classes2 = [int(x) for x in topt.split('-')]
-
+            _, bd_sz, do_bg, invert = [int(x) for x in topt.split('-')]
+    
             if label.ndim == 2:
-                out[tid] = seg_to_instance_bd(label[None, :], bd_sz, do_bg).astype(np.float32)
-                
+                if invert:
+                    out[tid] = 1. - seg_to_instance_bd(label[None, :], bd_sz, do_bg).astype(np.float32)
+                else:
+                    out[tid] = seg_to_instance_bd(label[None, :], bd_sz, do_bg).astype(np.float32)
             else:
-                out[tid] = seg_to_instance_bd(label, bd_sz, do_bg)[None, :].astype(np.float32)
-                
+                if invert:
+                    out[tid] = 1. - seg_to_instance_bd(label, bd_sz, do_bg)[None, :].astype(np.float32)
+                else:
+                    out[tid] = seg_to_instance_bd(label, bd_sz, do_bg)[None, :].astype(np.float32)
+        
         elif topt[0] == '5':  # distance transform (instance)
             if len(topt) == 1:
                 topt = topt + '-2d'
@@ -326,10 +331,7 @@ def seg_to_targets(label_orig: np.ndarray,
             distance = edt_semantic(label.copy(), mode, float(a), float(b))
             out[tid] = distance[np.newaxis, :].astype(np.float32)
         elif topt[0] == '9':  # generic semantic segmentation
-            if label.ndim == 2:
-                out[tid] = seg_to_instance_bd(label[None, :], 1, 1).astype(np.int64)
-            else:
-                out[tid] = seg_to_instance_bd(label, 1, 1)[None, :].astype(np.int64)
+            out[tid] = label.astype(np.int64)
         else:
             raise NameError("Target option %s is not valid!" % topt[0])
 
