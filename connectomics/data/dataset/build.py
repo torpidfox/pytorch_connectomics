@@ -173,9 +173,12 @@ def get_dataset(cfg,
 
     sample_label_size = cfg.MODEL.OUTPUT_SIZE
     topt, wopt = ['0'], [['0']]
-
+    
+    if mode == 'test':
+        augmentor = [augmentor]
+    
     dfs = []
-    for i in range(cfg.DATASET.NUM_DATASETS):
+    for i in range(len(augmentor)):
         if mode == 'train':
             sample_volume_size = augmentor[i].sample_size if augmentor is not None else cfg.MODEL.INPUT_SIZE
             sample_label_size = sample_volume_size
@@ -245,8 +248,9 @@ def get_dataset(cfg,
         
     combined_dataset = CombinedDataset(
         dfs,
-        cfg.DATASET.WEIGHTS,
-        cfg.DATASET.PROPORTION
+        cfg.DATASET.DATASET_WEIGHTS,
+        cfg.DATASET.PROPORTION,
+        mode
     )
 
     return combined_dataset

@@ -26,6 +26,7 @@ def getSegType(mid):
 
 
 def relabel(seg, do_type=False):
+    seg = seg.astype(getSegType(seg.max() + 1))
     # get the unique labels
     uid = np.unique(seg)
     # ignore all-background samples

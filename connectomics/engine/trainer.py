@@ -104,13 +104,15 @@ class Trainer(object):
             sample = next(self.dataloader)
             volume = sample.out_input
             target, weight = sample.out_target_l, sample.out_weight_l
+            target_weight = sample.out_target_weight_l
             self.data_time = time.perf_counter() - self.start_time
 
             # prediction
             volume = volume.to(self.device, non_blocking=True)
             with autocast(enabled=self.cfg.MODEL.MIXED_PRECESION):
                 pred = self.model(volume)
-                loss, losses_vis = self.criterion(pred, target, weight)
+                loss, losses_vis = self.criterion(pred, target, target_weight,
+                                                  weight)
 
             self._train_misc(loss, pred, volume, target, weight,
                              iter_total, losses_vis)

@@ -20,7 +20,7 @@ def readh5(filename, dataset=None):
 def readimg_as_vol(filename):
     img_suf = filename[filename.rfind('.')+1:]
     assert img_suf in ['png', 'tif']
-    data = imageio.imread(filename)
+    data = imageio.imread(filename, as_gray=True)
     print(data.shape)
     print(data)
     
