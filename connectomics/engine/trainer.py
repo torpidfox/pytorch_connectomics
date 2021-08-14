@@ -169,13 +169,14 @@ class Trainer(object):
             val_loss = 0.0
             for i, sample in enumerate(self.val_loader):
                 volume = sample.out_input
+                target_weight = sample.out_target_weight_l
                 target, weight = sample.out_target_l, sample.out_weight_l
 
                 # prediction
                 volume = volume.to(self.device, non_blocking=True)
                 with autocast(enabled=self.cfg.MODEL.MIXED_PRECESION):
                     pred = self.model(volume)
-                    loss, _ = self.criterion(pred, target, weight)
+                    loss, _ = self.criterion(pred, target, target_weight, weight)
                     val_loss += loss.data
 
         if hasattr(self, 'monitor'):

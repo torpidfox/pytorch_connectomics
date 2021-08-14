@@ -120,6 +120,7 @@ class Criterion(object):
     def evaluate(self,
                  pred: Tensor,
                  target: Union[List[Tensor], List[np.ndarray]],
+                 target_weight: List[float],
                  weight: Union[List[Tensor], List[np.ndarray]],
                  key: Optional[str] = None,
                  losses_vis: dict = {},  # visualizing individual losses
@@ -138,7 +139,7 @@ class Criterion(object):
                     self.act[i][j](x[i]),
                     target=target_t,
                     weight_mask=w_mask)
-                loss += loss_temp
+                loss += target_weight[i] * loss_temp
                 loss_tag = self.target_opt[i] + '_' + \
                     self.loss_opt[i][j] + '_' + str(i)
                 if key is not None:
@@ -163,6 +164,7 @@ class Criterion(object):
     def __call__(self,
                  pred: Union[Tensor, OrderedDict],
                  target: Union[List[Tensor], List[np.ndarray]],
+                 target_weight: List[float],
                  weight: Union[List[Tensor], List[np.ndarray]],
                  ) -> Tuple[Tensor, dict]:
 
@@ -172,13 +174,13 @@ class Criterion(object):
             # called (like it is in say, Ruby). This means that if you use a mutable default argument and mutate it, you
             # will and have mutated that object for all future calls to the function as well.
             # (According to https://docs.python-guide.org/writing/gotchas/)
-            return self.evaluate(pred, target, weight, losses_vis=losses_vis)
+            return self.evaluate(pred, target, target_weight, weight, losses_vis=losses_vis)
 
         # evaluate OrderedDict predicted by DeepLab
         loss = 0.0
         for key in pred.keys():
             temp_loss, losses_vis = self.evaluate(
-                pred[key], target, weight, key, losses_vis)
+                pred[key], target, target_weight, weight, key, losses_vis)
             loss += temp_loss
 
         return loss, losses_vis

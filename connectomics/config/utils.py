@@ -79,7 +79,6 @@ def update_inference_cfg(cfg: CfgNode):
             cfg.MODEL.OUTPUT_ACT = 'softmax'
             break
 
-
 def overwrite_cfg(cfg: CfgNode, args: argparse.Namespace):
     r"""Overwrite some configs given configs or args with higher priority.
     """

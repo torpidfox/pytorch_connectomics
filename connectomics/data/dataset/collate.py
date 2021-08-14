@@ -27,7 +27,8 @@ class TrainBatch:
     def __init__(self, batch):
         self._handle_basics(*zip(*batch))
 
-    def _handle_basics(self, pos, out_input, out_target, out_weight):
+    def _handle_basics(self, pos, out_input, out_target,
+                       out_weight, out_target_weight):
         self.pos = pos
         self.out_input = torch.from_numpy(np.stack(out_input, 0))
 
@@ -49,6 +50,7 @@ class TrainBatch:
 
         self.out_target_l = out_target_l
         self.out_weight_l = out_weight_l
+        self.out_target_weight_l = torch.as_tensor(out_target_weight)
 
     # custom memory pinning method on custom type
     def pin_memory(self):

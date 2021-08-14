@@ -13,6 +13,7 @@ import torch.utils.data
 
 from .dataset_volume import VolumeDataset
 from .dataset_tile import TileDataset
+from .dataset_combined import CombinedDataset
 from .collate import *
 from ..utils import *
 
@@ -70,18 +71,20 @@ def _get_file_list(name: Union[str, List[str]]) -> list:
     return name.split('@')
 
 
-def _get_input(cfg,
+def _get_input(i,
+               cfg,
                mode='train',
                rank=None,
                dir_name_init: Optional[list] = None,
                img_name_init: Optional[list] = None):
     r"""Load the inputs specified by the configuration options.
     """
+    print(mode)
     assert mode in ['train', 'val', 'test']
     if dir_name_init is not None:
         dir_name = dir_name_init
     else:
-        dir_name = _get_file_list(cfg.DATASET.INPUT_PATH)
+        dir_name = _get_file_list(cfg.DATASET.INPUT_PATH[i])
 
     if mode == 'val':
         img_name = cfg.DATASET.VAL_IMAGE_NAME
@@ -89,8 +92,8 @@ def _get_input(cfg,
         valid_mask_name = cfg.DATASET.VAL_VALID_MASK_NAME
         pad_size = cfg.DATASET.VAL_PAD_SIZE
     else:
-        img_name = cfg.DATASET.IMAGE_NAME
-        label_name = cfg.DATASET.LABEL_NAME
+        img_name = cfg.DATASET.IMAGE_NAME[i]
+        label_name = cfg.DATASET.LABEL_NAME[i]
         valid_mask_name = cfg.DATASET.VALID_MASK_NAME
         pad_size = cfg.DATASET.PAD_SIZE
 
@@ -117,7 +120,7 @@ def _get_input(cfg,
 
     pad_mode = cfg.DATASET.PAD_MODE
     volume = [None] * len(img_name)
-    read_fn = readvol if not cfg.DATASET.LOAD_2D else readimg_as_vol
+    read_fn = readvol if not cfg.DATASET.LOAD_2D[i] else readimg_as_vol
     for i in range(len(img_name)):
         volume[i] = read_fn(img_name[i])
         print(f"volume shape (original): {volume[i].shape}")
@@ -165,76 +168,88 @@ def get_dataset(cfg,
                 img_name_init: Optional[list] = None):
     r"""Prepare dataset for training and inference.
     """
+    print(mode)
     assert mode in ['train', 'val', 'test']
 
     sample_label_size = cfg.MODEL.OUTPUT_SIZE
     topt, wopt = ['0'], [['0']]
-    if mode == 'train':
-        sample_volume_size = augmentor.sample_size if augmentor is not None else cfg.MODEL.INPUT_SIZE
-        sample_label_size = sample_volume_size
-        sample_stride = (1, 1, 1)
-        topt, wopt = cfg.MODEL.TARGET_OPT, cfg.MODEL.WEIGHT_OPT
-        iter_num = cfg.SOLVER.ITERATION_TOTAL * cfg.SOLVER.SAMPLES_PER_BATCH
-        if cfg.SOLVER.SWA.ENABLED:
-            iter_num += cfg.SOLVER.SWA.BN_UPDATE_ITER
 
-    elif mode == 'val':
-        sample_volume_size = cfg.MODEL.INPUT_SIZE
-        sample_label_size = sample_volume_size
-        sample_stride = [max(1, x//2) for x in sample_volume_size]
-        topt, wopt = cfg.MODEL.TARGET_OPT, cfg.MODEL.WEIGHT_OPT
-        iter_num = -1
-
-    elif mode == 'test':
-        sample_volume_size = cfg.MODEL.INPUT_SIZE
-        sample_stride = cfg.INFERENCE.STRIDE
-        iter_num = -1
-
-    shared_kwargs = {
-        "sample_volume_size": sample_volume_size,
-        "sample_label_size": sample_label_size,
-        "sample_stride": sample_stride,
-        "augmentor": augmentor,
-        "target_opt": topt,
-        "weight_opt": wopt,
-        "mode": mode,
-        "do_2d": cfg.DATASET.DO_2D,
-        "reject_size_thres": cfg.DATASET.REJECT_SAMPLING.SIZE_THRES,
-        "reject_diversity": cfg.DATASET.REJECT_SAMPLING.DIVERSITY,
-        "reject_p": cfg.DATASET.REJECT_SAMPLING.P,
-        "data_mean": cfg.DATASET.MEAN,
-        "data_std": cfg.DATASET.STD,
-        "erosion_rates": cfg.MODEL.LABEL_EROSION,
-        "dilation_rates": cfg.MODEL.LABEL_DILATION,
-    }
-
-    if cfg.DATASET.DO_CHUNK_TITLE == 1:  # build TileDataset
-        label_json, valid_mask_json = None, None
+    dfs = []
+    for i in range(cfg.DATASET.NUM_DATASETS):
         if mode == 'train':
-            if cfg.DATASET.LABEL_NAME is not None:
-                label_json = cfg.DATASET.INPUT_PATH + cfg.DATASET.LABEL_NAME
-            if cfg.DATASET.VALID_MASK_NAME is not None:
-                valid_mask_json = cfg.DATASET.INPUT_PATH + cfg.DATASET.VALID_MASK_NAME
+            sample_volume_size = augmentor[i].sample_size if augmentor is not None else cfg.MODEL.INPUT_SIZE
+            sample_label_size = sample_volume_size
+            sample_stride = (1, 1, 1)
+            topt, wopt = cfg.MODEL.TARGET_OPT, cfg.MODEL.WEIGHT_OPT
+            iter_num = cfg.SOLVER.ITERATION_TOTAL * cfg.SOLVER.SAMPLES_PER_BATCH
+            if cfg.SOLVER.SWA.ENABLED:
+                iter_num += cfg.SOLVER.SWA.BN_UPDATE_ITER
+    
+        elif mode == 'val':
+            sample_volume_size = cfg.MODEL.INPUT_SIZE
+            sample_label_size = sample_volume_size
+            sample_stride = [max(1, x//2) for x in sample_volume_size]
+            topt, wopt = cfg.MODEL.TARGET_OPT, cfg.MODEL.WEIGHT_OPT
+            iter_num = -1
+    
+        elif mode == 'test':
+            sample_volume_size = cfg.MODEL.INPUT_SIZE
+            sample_stride = cfg.INFERENCE.STRIDE
+            iter_num = -1
+        
+    
+        shared_kwargs = {
+            "sample_volume_size": sample_volume_size,
+            "sample_label_size": sample_label_size,
+            "sample_stride": sample_stride,
+            "augmentor": augmentor[i],
+            "target_opt": topt,
+            "weight_opt": wopt,
+            "mode": mode,
+            "do_2d": cfg.DATASET.DO_2D,
+            "reject_size_thres": cfg.DATASET.REJECT_SAMPLING.SIZE_THRES,
+            "reject_diversity": cfg.DATASET.REJECT_SAMPLING.DIVERSITY,
+            "reject_p": cfg.DATASET.REJECT_SAMPLING.P,
+            "data_mean": cfg.DATASET.MEAN,
+            "data_std": cfg.DATASET.STD,
+            "erosion_rates": cfg.MODEL.LABEL_EROSION,
+            "dilation_rates": cfg.MODEL.LABEL_DILATION,
+        }
+    
+        if cfg.DATASET.DO_CHUNK_TITLE == 1:  # build TileDataset
+            label_json, valid_mask_json = None, None
+            if mode == 'train':
+                if cfg.DATASET.LABEL_NAME is not None:
+                    label_json = cfg.DATASET.INPUT_PATH + cfg.DATASET.LABEL_NAME
+                if cfg.DATASET.VALID_MASK_NAME is not None:
+                    valid_mask_json = cfg.DATASET.INPUT_PATH + cfg.DATASET.VALID_MASK_NAME
+    
+            dataset = TileDataset(chunk_num=cfg.DATASET.DATA_CHUNK_NUM,
+                                  chunk_ind=cfg.DATASET.DATA_CHUNK_IND,
+                                  chunk_ind_split=cfg.DATASET.CHUNK_IND_SPLIT,
+                                  chunk_iter=cfg.DATASET.DATA_CHUNK_ITER,
+                                  chunk_stride=cfg.DATASET.DATA_CHUNK_STRIDE,
+                                  volume_json=cfg.DATASET.INPUT_PATH+cfg.DATASET.IMAGE_NAME,
+                                  label_json=label_json,
+                                  valid_mask_json=valid_mask_json,
+                                  pad_size=cfg.DATASET.PAD_SIZE,
+                                  data_scale=cfg.DATASET.DATA_SCALE,
+                                  **shared_kwargs)
+    
+        else:  # build VolumeDataset
+            volume, label, valid_mask = _get_input(
+                i, cfg, mode, rank, dir_name_init, img_name_init)
+            dataset = VolumeDataset(volume=volume, label=label, valid_mask=valid_mask,
+                                    iter_num=iter_num,  **shared_kwargs)
+        dfs.append(dataset)
+        
+    combined_dataset = CombinedDataset(
+        dfs,
+        cfg.DATASET.WEIGHTS,
+        cfg.DATASET.PROPORTION
+    )
 
-        dataset = TileDataset(chunk_num=cfg.DATASET.DATA_CHUNK_NUM,
-                              chunk_ind=cfg.DATASET.DATA_CHUNK_IND,
-                              chunk_ind_split=cfg.DATASET.CHUNK_IND_SPLIT,
-                              chunk_iter=cfg.DATASET.DATA_CHUNK_ITER,
-                              chunk_stride=cfg.DATASET.DATA_CHUNK_STRIDE,
-                              volume_json=cfg.DATASET.INPUT_PATH+cfg.DATASET.IMAGE_NAME,
-                              label_json=label_json,
-                              valid_mask_json=valid_mask_json,
-                              pad_size=cfg.DATASET.PAD_SIZE,
-                              data_scale=cfg.DATASET.DATA_SCALE,
-                              **shared_kwargs)
-
-    else:  # build VolumeDataset
-        volume, label, valid_mask = _get_input(
-            cfg, mode, rank, dir_name_init, img_name_init)
-        dataset = VolumeDataset(volume=volume, label=label, valid_mask=valid_mask,
-                                iter_num=iter_num,  **shared_kwargs)
-
-    return dataset
+    return combined_dataset
 
 
 def build_dataloader(cfg, augmentor, mode='train', dataset=None, rank=None):

@@ -26,8 +26,6 @@ def build_train_augmentor(cfg: CfgNode, keep_uncropped: bool = False, keep_non_s
         The two arguments, keep_uncropped and keep_non_smoothed, are used only for debugging,
         which are `False` by defaults and can not be adjusted in the config file.
     """
-    aug_list = []
-    
     names = cfg.AUGMENTOR.ADDITIONAL_TARGETS_NAME
     types = cfg.AUGMENTOR.ADDITIONAL_TARGETS_TYPE
     if names is None:
@@ -38,100 +36,105 @@ def build_train_augmentor(cfg: CfgNode, keep_uncropped: bool = False, keep_non_s
         for i in range(len(names)):
             additional_targets[names[i]] = types[i]
 
+    augs = []
+    for i in range(cfg.DATASET.NUM_DATASETS):
+        aug_list = []
     #1. rotate
-    if cfg.AUGMENTOR.ROTATE.ENABLED:
-        aug_list.append(
-            Rotate(rot90=cfg.AUGMENTOR.ROTATE.ROT90,
-                   p=cfg.AUGMENTOR.ROTATE.P,
-                   additional_targets=additional_targets))
-
-    #2. rescale
-    if cfg.AUGMENTOR.RESCALE.ENABLED:
-        aug_list.append(
-            Rescale(p=cfg.AUGMENTOR.RESCALE.P,
-                    additional_targets=additional_targets))
-
-    #3. flip
-    if cfg.AUGMENTOR.FLIP.ENABLED:
-        aug_list.append(
-            Flip(do_ztrans=cfg.AUGMENTOR.FLIP.DO_ZTRANS,
-                 p=cfg.AUGMENTOR.FLIP.P, 
-                 additional_targets=additional_targets))
-
-    #4. elastic
-    if cfg.AUGMENTOR.ELASTIC.ENABLED:
-        aug_list.append(
-            Elastic(alpha=cfg.AUGMENTOR.ELASTIC.ALPHA, 
-                    sigma=cfg.AUGMENTOR.ELASTIC.SIGMA, 
-                    p=cfg.AUGMENTOR.ELASTIC.P,
-                    additional_targets=additional_targets))
-
-    #5. grayscale
-    if cfg.AUGMENTOR.GRAYSCALE.ENABLED:
-        aug_list.append(
-            Grayscale(p=cfg.AUGMENTOR.GRAYSCALE.P,
-                      additional_targets=additional_targets))
-
-    #6. missingparts
-    if cfg.AUGMENTOR.MISSINGPARTS.ENABLED:
-        aug_list.append(
-            MissingParts(iterations=cfg.AUGMENTOR.MISSINGPARTS.ITER,
-                         p=cfg.AUGMENTOR.MISSINGPARTS.P,
-                         additional_targets=additional_targets))
-
-    #7. missingsection
-    if cfg.AUGMENTOR.MISSINGSECTION.ENABLED and not cfg.DATASET.DO_2D:
+        if cfg.AUGMENTOR.ROTATE.ENABLED[i]:
             aug_list.append(
-                MissingSection(
-                    num_sections=cfg.AUGMENTOR.MISSINGSECTION.NUM_SECTION,
-                    p=cfg.AUGMENTOR.MISSINGSECTION.P, 
-                    additional_targets=additional_targets))
-
-    #8. misalignment
-    if cfg.AUGMENTOR.MISALIGNMENT.ENABLED and not cfg.DATASET.DO_2D:
+                Rotate(rot90=cfg.AUGMENTOR.ROTATE.ROT90[i],
+                       p=cfg.AUGMENTOR.ROTATE.P[i],
+                       additional_targets=additional_targets))
+    
+        #2. rescale
+        if cfg.AUGMENTOR.RESCALE.ENABLED[i]:
             aug_list.append(
-                MisAlignment( 
-                    displacement=cfg.AUGMENTOR.MISALIGNMENT.DISPLACEMENT,
-                    rotate_ratio=cfg.AUGMENTOR.MISALIGNMENT.ROTATE_RATIO,
-                    p=cfg.AUGMENTOR.MISALIGNMENT.P,
-                    additional_targets=additional_targets))
-
-    #9. motion-blur
-    if cfg.AUGMENTOR.MOTIONBLUR.ENABLED:
-        aug_list.append(
-            MotionBlur( 
-                sections=cfg.AUGMENTOR.MOTIONBLUR.SECTIONS, 
-                kernel_size=cfg.AUGMENTOR.MOTIONBLUR.KERNEL_SIZE,
-                p=cfg.AUGMENTOR.MOTIONBLUR.P,
-                additional_targets=additional_targets))
-
-    #10. cut-blur
-    if cfg.AUGMENTOR.CUTBLUR.ENABLED:
-        aug_list.append(
-            CutBlur(length_ratio=cfg.AUGMENTOR.CUTBLUR.LENGTH_RATIO, 
-                    down_ratio_min=cfg.AUGMENTOR.CUTBLUR.DOWN_RATIO_MIN,
-                    down_ratio_max=cfg.AUGMENTOR.CUTBLUR.DOWN_RATIO_MAX,
-                    downsample_z=cfg.AUGMENTOR.CUTBLUR.DOWNSAMPLE_Z,
-                    p=cfg.AUGMENTOR.CUTBLUR.P,
-                    additional_targets=additional_targets))
-
-    #11. cut-noise
-    if cfg.AUGMENTOR.CUTNOISE.ENABLED:
-        aug_list.append(
-            CutNoise(length_ratio=cfg.AUGMENTOR.CUTNOISE.LENGTH_RATIO, 
-                     scale=cfg.AUGMENTOR.CUTNOISE.SCALE,
-                     p=cfg.AUGMENTOR.CUTNOISE.P, 
+                Rescale(p=cfg.AUGMENTOR.RESCALE.P[i],
+                        additional_targets=additional_targets))
+    
+        #3. flip
+        if cfg.AUGMENTOR.FLIP.ENABLED[i]:
+            aug_list.append(
+                Flip(do_ztrans=cfg.AUGMENTOR.FLIP.DO_ZTRANS[i],
+                     p=cfg.AUGMENTOR.FLIP.P[i],
                      additional_targets=additional_targets))
+    
+        #4. elastic
+        if cfg.AUGMENTOR.ELASTIC.ENABLED[i]:
+            aug_list.append(
+                Elastic(alpha=cfg.AUGMENTOR.ELASTIC.ALPHA[i],
+                        sigma=cfg.AUGMENTOR.ELASTIC.SIGMA[i],
+                        p=cfg.AUGMENTOR.ELASTIC.P[i],
+                        additional_targets=additional_targets))
+    
+        #5. grayscale
+        if cfg.AUGMENTOR.GRAYSCALE.ENABLED[i]:
+            aug_list.append(
+                Grayscale(p=cfg.AUGMENTOR.GRAYSCALE.P[i],
+                          additional_targets=additional_targets))
+    
+        #6. missingparts
+        if cfg.AUGMENTOR.MISSINGPARTS.ENABLED[i]:
+            aug_list.append(
+                MissingParts(iterations=cfg.AUGMENTOR.MISSINGPARTS.ITER[i],
+                             p=cfg.AUGMENTOR.MISSINGPARTS.P[i],
+                             additional_targets=additional_targets))
+    
+        #7. missingsection
+        if cfg.AUGMENTOR.MISSINGSECTION.ENABLED[i] and not cfg.DATASET.DO_2D:
+                aug_list.append(
+                    MissingSection(
+                        num_sections=cfg.AUGMENTOR.MISSINGSECTION.NUM_SECTION,
+                        p=cfg.AUGMENTOR.MISSINGSECTION.P,
+                        additional_targets=additional_targets))
+    
+        #8. misalignment
+        if cfg.AUGMENTOR.MISALIGNMENT.ENABLED[i] and not cfg.DATASET.DO_2D:
+                aug_list.append(
+                    MisAlignment(
+                        displacement=cfg.AUGMENTOR.MISALIGNMENT.DISPLACEMENT,
+                        rotate_ratio=cfg.AUGMENTOR.MISALIGNMENT.ROTATE_RATIO,
+                        p=cfg.AUGMENTOR.MISALIGNMENT.P,
+                        additional_targets=additional_targets))
+    
+        #9. motion-blur
+        if cfg.AUGMENTOR.MOTIONBLUR.ENABLED[i]:
+            aug_list.append(
+                MotionBlur(
+                    sections=cfg.AUGMENTOR.MOTIONBLUR.SECTIONS[i],
+                    kernel_size=cfg.AUGMENTOR.MOTIONBLUR.KERNEL_SIZE[i],
+                    p=cfg.AUGMENTOR.MOTIONBLUR.P[i],
+                    additional_targets=additional_targets))
+    
+        #10. cut-blur
+        if cfg.AUGMENTOR.CUTBLUR.ENABLED[i]:
+            aug_list.append(
+                CutBlur(length_ratio=cfg.AUGMENTOR.CUTBLUR.LENGTH_RATIO[i],
+                        down_ratio_min=cfg.AUGMENTOR.CUTBLUR.DOWN_RATIO_MIN[i],
+                        down_ratio_max=cfg.AUGMENTOR.CUTBLUR.DOWN_RATIO_MAX[i],
+                        downsample_z=cfg.AUGMENTOR.CUTBLUR.DOWNSAMPLE_Z[i],
+                        p=cfg.AUGMENTOR.CUTBLUR.P[i],
+                        additional_targets=additional_targets))
+    
+        #11. cut-noise
+        if cfg.AUGMENTOR.CUTNOISE.ENABLED[i]:
+            aug_list.append(
+                CutNoise(length_ratio=cfg.AUGMENTOR.CUTNOISE.LENGTH_RATIO[i],
+                         scale=cfg.AUGMENTOR.CUTNOISE.SCALE[i],
+                         p=cfg.AUGMENTOR.CUTNOISE.P[i],
+                         additional_targets=additional_targets))
+    
+        # compose the list of transforms
+        augmentor = Compose(transforms=aug_list,
+                            input_size=cfg.MODEL.INPUT_SIZE,
+                            smooth=cfg.AUGMENTOR.SMOOTH,
+                            keep_uncropped=keep_uncropped,
+                            keep_non_smoothed=keep_non_smoothed,
+                            additional_targets=additional_targets)
+        
+        augs.append(augmentor)
 
-    # compose the list of transforms
-    augmentor = Compose(transforms=aug_list, 
-                        input_size=cfg.MODEL.INPUT_SIZE, 
-                        smooth=cfg.AUGMENTOR.SMOOTH,
-                        keep_uncropped=keep_uncropped, 
-                        keep_non_smoothed=keep_non_smoothed,
-                        additional_targets=additional_targets)
-
-    return augmentor
+    return augs
 
 def build_ssl_augmentor(cfg):
     R"""Build the data augmentor for semi-supervised learning.
