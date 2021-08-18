@@ -35,6 +35,8 @@ class CombinedDataset(torch.utils.data.Dataset):
             
             if self.mode == 'train':
                 return sample + (self.weights[0],)
+            elif self.mode == 'val':
+                return sample + (1.0, )
             else:
                 return sample
         

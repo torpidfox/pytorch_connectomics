@@ -136,8 +136,8 @@ class Criterion(object):
                 w_mask = None if weight[i][j].shape[-1] == 1 else self.to_torch(
                     weight[i][j])
                 loss_temp = self.loss_w[i][j] * self.loss_fn[i][j](
-                    torch.squeeze(self.act[i][j](x[i])),
-                    target=target_t.float(),
+                    torch.squeeze(self.act[i][j](x[i]), dim=1),
+                    target=torch.squeeze(target_t.float(), dim=1),
                     weight_mask=w_mask)
                 loss += target_weight[i] * loss_temp
                 loss_tag = self.target_opt[i] + '_' + \
