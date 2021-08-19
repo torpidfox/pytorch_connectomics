@@ -24,7 +24,7 @@ class CombinedDataset(torch.utils.data.Dataset):
     
     def __getitem__(self, item):
         #fix this
-        if self.mode != 'train':
+        if self.mode == 'train':
             select_first = np.random.uniform() < self.proportion[0]
         else:
             select_first = True
