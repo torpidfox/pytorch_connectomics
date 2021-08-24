@@ -24,13 +24,14 @@ class CombinedDataset(torch.utils.data.Dataset):
     
     def __getitem__(self, item):
         #fix this
+
         if self.mode == 'train':
             select_first = np.random.uniform() < self.proportion[0]
         else:
             select_first = True
         
         if select_first:
-            len_first = len(self.datasets[0])
+            len_first = np.floor(len(self.datasets[0]) * self.proportion[0])
             sample = self.datasets[0][item % len_first]
             
             if self.mode == 'train':
