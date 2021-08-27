@@ -50,6 +50,7 @@ class Trainer(object):
         self.rank = rank
         self.is_main_process = rank is None or rank == 0
         self.inference_singly = (mode == 'test') and cfg.INFERENCE.DO_SINGLY
+        self.early_stopping = self.cfg.SOLVER.EARLY_STOPPING
 
         self.model = build_model(self.cfg, self.device, rank)
         if self.mode == 'train':
@@ -116,6 +117,11 @@ class Trainer(object):
 
             self._train_misc(loss, pred, volume, target, weight,
                              iter_total, losses_vis)
+            
+            if self.early_stopping != -1:
+                if (iter_total - self.best_val_iter) > self.early_stopping:
+                    print(f"no improvements for {self.early_stopping} iterations. stopping")
+                    break
 
         self.maybe_save_swa_model()
 
@@ -189,6 +195,7 @@ class Trainer(object):
 
         if not hasattr(self, 'best_val_loss'):
             self.best_val_loss = val_loss
+            self.best_val_iter = iter_total
 
         if val_loss < self.best_val_loss:
             self.best_val_loss = val_loss
