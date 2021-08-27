@@ -117,11 +117,12 @@ class Trainer(object):
 
             self._train_misc(loss, pred, volume, target, weight,
                              iter_total, losses_vis)
-            
-            if self.early_stopping != -1:
-                if (iter_total - self.best_val_iter) > self.early_stopping:
-                    print(f"no improvements for {self.early_stopping} iterations. stopping")
-                    break
+
+            if hasattr(self, 'best_val_loss'):
+                if self.early_stopping != -1:
+                    if (iter_total - self.best_val_iter) > self.early_stopping:
+                        print(f"no improvements for {self.early_stopping} iterations. stopping")
+                        break
 
         self.maybe_save_swa_model()
 
@@ -199,6 +200,7 @@ class Trainer(object):
 
         if val_loss < self.best_val_loss:
             self.best_val_loss = val_loss
+            self.best_val_iter = iter_total
             self.save_checkpoint(iter_total, is_best=True)
 
         # Release some GPU memory and ensure same GPU usage in the consecutive iterations according to
