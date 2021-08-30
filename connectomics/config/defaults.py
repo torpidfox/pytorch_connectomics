@@ -114,6 +114,7 @@ _C.DATASET.NUM_DATASETS = 1
 #weightning of samples from each dataset in the loss
 _C.DATASET.DATASET_WEIGHTS = [1.]
 _C.DATASET.PROPORTION = [1.]
+_C.DATASET.FIRST_SHARE = 1.
 
 _C.DATASET.DATA_SCALE = [1., 1., 1.]
 

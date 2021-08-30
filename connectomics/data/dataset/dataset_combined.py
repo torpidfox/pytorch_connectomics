@@ -9,12 +9,14 @@ class CombinedDataset(torch.utils.data.Dataset):
                  datasets: List[torch.utils.data.Dataset],
                  weights: List[float] = [1],
                  proportion: List[float] = 1,
+                 first_share: float = 1.0,
                  mode: str = 'train'):
         self.datasets = datasets
         self.weights = weights
         self.proportion = proportion
         self.volume_size = []
         self.mode = mode
+        self.first_share = first_share
         
         for d in self.datasets:
             self.volume_size += [np.array(x.shape) for x in d.volume]
@@ -32,7 +34,7 @@ class CombinedDataset(torch.utils.data.Dataset):
 
         if select_first:
             if self.mode == 'train':
-                len_first = np.floor(len(self.datasets[0]) * self.proportion[0])
+                len_first = np.floor(len(self.datasets[0]) * self.first_share)
             else:
                 len_first = len(self.datasets[0])
                 

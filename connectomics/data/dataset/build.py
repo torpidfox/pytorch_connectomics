@@ -251,6 +251,7 @@ def get_dataset(cfg,
         dfs,
         cfg.DATASET.DATASET_WEIGHTS,
         cfg.DATASET.PROPORTION,
+        cfg.DATASET.FIRST_SHARE,
         mode
     )
 
